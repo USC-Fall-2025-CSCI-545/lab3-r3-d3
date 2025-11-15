@@ -115,7 +115,8 @@ class AdaRRT():
 
             if new_node and self._check_for_completion(new_node):
                 # FILL in your code here
-                path = self._trace_path_from_start(new_node)
+                goal_node = new_node.add_child(self.goal.state)
+                path = self._trace_path_from_start(goal_node)
                 return path
 
         print("Failed to find path from {0} to {1} after {2} iterations!".format(
