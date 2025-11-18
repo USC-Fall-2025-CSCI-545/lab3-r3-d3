@@ -109,7 +109,10 @@ class AdaRRT():
 
             # sample q_rand
             # find nearest neighbor
-            q_rand = self._get_random_sample()
+            if np.random.rand()<0.2:
+                q_rand=self._get_random_sample_near_goal()
+            else:
+                q_rand = self._get_random_sample()
             nearest_neighbor = self._get_nearest_neighbor(q_rand)
             new_node = self._extend_sample(q_rand, nearest_neighbor)
 
@@ -121,6 +124,15 @@ class AdaRRT():
 
         print("Failed to find path from {0} to {1} after {2} iterations!".format(
             self.start.state, self.goal.state, self.max_iter))
+
+    def _get_random_sample_near_goal(self):
+        """
+        """
+        goal=np.array(self.goal.state)
+        noise=np.random.uniform(-0.05,0.05,size=goal.shape)
+        sample=goal+noise
+        sample=np.clip(sample,self.joint_lower_limits,self.joint_upper_limits)
+        return sample
 
     def _get_random_sample(self):
         """
@@ -228,7 +240,7 @@ def main(is_sim):
     armHome = [-1.5, 3.22, 1.23, -2.19, 1.8, 1.2]
     goalConfig = [-1.72, 4.44, 2.02, -2.04, 2.66, 1.39]
     delta = 0.25
-    eps = 1.0
+    eps = 0.2
 
     if is_sim:
         ada.set_positions(goalConfig)
@@ -282,7 +294,7 @@ def main(is_sim):
             waypoints.append((0.0 + i, waypoint))
 
         t0 = time.clock()
-        traj = ada.compute_joint_space_path(
+        traj = ada.compute_smooth_joint_space_path(
             ada.get_arm_state_space(), waypoints)
         t = time.clock() - t0
         print(str(t) + "seconds elapsed")
